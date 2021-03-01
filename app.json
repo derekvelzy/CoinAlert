@@ -1,0 +1,12 @@
+{
+  "name": "CryptoAlert",
+  "displayName": "CryptoAlert",
+  "expo": {
+    "name": "CryptoAlert",
+    "slug": "CryptoAlert",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
