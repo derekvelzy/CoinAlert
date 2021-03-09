@@ -4,6 +4,8 @@ key.js
 #
 .DS_Store
 
+GoogleService-Info.plist
+
 # Xcode
 #
 build/
