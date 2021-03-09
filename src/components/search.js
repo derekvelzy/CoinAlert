@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { StyleSheet, Text, View, Dimensions, TextInput, TouchableOpacity, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Spring, animated } from 'react-spring/dist/react-spring-native.esm';
+import { useSpring, animated } from 'react-spring/native.js';
 import { Context } from '../context.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { setTime } from '../redux/coins.js';
 import { setSearch } from '../redux/search.js';
 import { timeSort, setSortMethod, searchSort } from '../redux/coins.js';
+
+const AnimatedView = animated(View);
 
 const Search = () => {
   const { apiTime, time, sortMethod } = useSelector(state => state.coin);
@@ -22,193 +24,192 @@ const Search = () => {
     dispatch(searchSort(e))
   }
 
+  const searchBarProps = useSpring({
+    from: {
+      ...styles.searchbarBox
+    },
+    to: {
+      ...styles.searchbarBox,
+      width: pos ? Dimensions.get('window').width * 0.9 : Dimensions.get('window').width * 0.7
+    },
+    delay: pos ? 125 : 0
+  });
+
+  const optionsProps = useSpring({
+    from: {...styles.options},
+    to: {
+      ...styles.options,
+      right: pos ? 0 : -180,
+      width: pos ? Dimensions.get('window').width * 0.9 : 50,
+    },
+    delay: pos ? 350 : 0
+  });
+
+  const padProps = useSpring({
+    from: {...styles.pad},
+    to: {...styles.pad, marginTop: pos ? 75 : 0},
+    delay: pos ? 0 : 250
+  });
+
+  const filterBoxProps = useSpring({
+    from: {...styles.filterBox},
+    to: {
+      ...styles.filterBox,
+      height: pos ? 70 : 50,
+      marginTop: pos ? 75 : 0,
+      shadowOpacity: pos ? 0 : 0.5,
+      shadowColor: pos ? 'rgba(0, 0, 0, 0)' : 'rgba(181, 153, 38, 1)',
+      shadowOpacity: pos ? 0 : 0.5,
+      paddingRight: pos ? 5 : 0,
+    },
+    delay: pos ? 0 : 250
+  });
+
+  const marginProps = useSpring({
+    from: {marginTop: 0},
+    to: {marginTop: pos ? 100 + modal : 0},
+    delay: modal === 0 ? 300 : 0
+  })
+
+  const timeBoxProps = useSpring({
+    from: {...styles.timeBox},
+    to: {
+      ...styles.timeBox,
+      marginLeft: modal === 70 ? Dimensions.get('window').width * 0.05 : -Dimensions.get('window').width,
+    },
+    delay: modal === 70 ? 0 : 100
+  })
+
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        <Spring
-          native
-          from={{...styles.searchbarBox}}
-          to={{...styles.searchbarBox,
-            width: pos ? Dimensions.get('window').width * 0.9 : Dimensions.get('window').width * 0.7
-          }}
-          delay={pos ? 125 : 0}
-        >
-          {props => (
-            <animated.View style={{...props}}>
-              <TextInput
-                style={styles.searchbar}
-                value={search}
-                onChangeText={(e) => handleChange(e)}
-              />
-            </animated.View>
-          )}
-        </Spring>
-        <Spring
-          native
-          from={{...styles.options}}
-          to={{
-            ...styles.options,
-            right: pos ? 0 : -180,
-            width: pos ? Dimensions.get('window').width * 0.9 : 50,
-          }}
-          delay={pos ? 350 : 0}
-        >
-          {props => (
-            <animated.View style={{...props}}>
-              <TouchableOpacity
-                style={styles.history}
-                onPress={() => {
-                  modal === 70 ? setModal(0) : setModal(70)
-                }}
-              >
-                <Icon name="history" size={30} color="white" style={styles.time} />
-                <Icon name="caret-down" size={30} color="white" />
-              </TouchableOpacity>
-              <View style={styles.buttonBox}>
-                <TouchableOpacity
-                  onPress={() => {
-                    dispatch(setSortMethod(true));
-                    dispatch(timeSort({type: true, time: apiTime}));
-                  }}
-                  style={{
-                    ...styles.sortBy,
-                    backgroundColor: sortMethod ? 'white' : 'rgb(250, 204, 50)',
-                    borderColor: sortMethod ? 'rgb(250, 204, 50)' : 'white',
-                  }}
-                >
-                  <Text style={{...styles.typeText, color: sortMethod ? 'rgb(60, 60, 60)' : 'white'}}>
-                    Movement
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    dispatch(setSortMethod(false));
-                    dispatch(timeSort({type: false, time: apiTime}));
-                  }}
-                  style={{
-                    ...styles.sortBy,
-                    backgroundColor: sortMethod ? 'rgb(250, 204, 50)' : 'white',
-                    borderColor: sortMethod ? 'white' : 'rgb(250, 204, 50)'
-                  }}
-                >
-                  <Text style={{...styles.typeText, color: sortMethod ? 'white' : 'rgb(60, 60, 60)'}}>
-                    Popularity
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </animated.View>
-          )}
-        </Spring>
-        <Spring native from={{...styles.pad}} to={{...styles.pad, marginTop: pos ? 75 : 0}} delay={pos ? 0 : 250}>
-          {props => <animated.View style={{...props}} />}
-        </Spring>
-        <Spring
-          native
-          from={{...styles.filterBox}}
-          to={{
-            ...styles.filterBox,
-            height: pos ? 70 : 50,
-            marginTop: pos ? 75 : 0,
-            shadowOpacity: pos ? 0 : 0.5,
-            shadowColor: pos ? 'rgba(0, 0, 0, 0)' : 'rgba(181, 153, 38, 1)',
-            shadowOpacity: pos ? 0 : 0.5,
-            paddingRight: pos ? 5 : 0,
-          }}
-          delay={pos ? 0 : 250}
-        >
-          {props => (
-            <animated.View style={{...props}}>
-              <TouchableOpacity style={styles.filter} onPress={() => {
-                setPos(!pos);
-                setModal(0);
-              }}>
-                <Icon name="sliders" size={30} color="white" />
-              </TouchableOpacity>
-            </animated.View>
-          )}
-        </Spring>
+        <AnimatedView style={searchBarProps}>
+          <TextInput
+            style={styles.searchbar}
+            value={search}
+            onChangeText={(e) => handleChange(e)}
+          />
+        </AnimatedView>
+        <AnimatedView style={optionsProps}>
+          <TouchableOpacity
+            style={styles.history}
+            onPress={() => {
+              modal === 70 ? setModal(0) : setModal(70)
+            }}
+          >
+            <Icon name="history" size={30} color="white" style={styles.time} />
+            <Icon name="caret-down" size={30} color="white" />
+          </TouchableOpacity>
+          <View style={styles.buttonBox}>
+            <TouchableOpacity
+              onPress={() => {
+                dispatch(setSortMethod(true));
+                dispatch(timeSort({type: true, time: apiTime}));
+              }}
+              style={{
+                ...styles.sortBy,
+                backgroundColor: sortMethod ? 'white' : 'rgb(250, 204, 50)',
+                borderColor: sortMethod ? 'rgb(250, 204, 50)' : 'white',
+              }}
+            >
+              <Text style={{...styles.typeText, color: sortMethod ? 'rgb(60, 60, 60)' : 'white'}}>
+                Movement
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                dispatch(setSortMethod(false));
+                dispatch(timeSort({type: false, time: apiTime}));
+              }}
+              style={{
+                ...styles.sortBy,
+                backgroundColor: sortMethod ? 'rgb(250, 204, 50)' : 'white',
+                borderColor: sortMethod ? 'white' : 'rgb(250, 204, 50)'
+              }}
+            >
+              <Text style={{...styles.typeText, color: sortMethod ? 'white' : 'rgb(60, 60, 60)'}}>
+                Popularity
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </AnimatedView>
+        <AnimatedView style={padProps} />
+        <AnimatedView style={filterBoxProps}>
+          <TouchableOpacity style={styles.filter} onPress={() => {
+            setPos(!pos);
+            setModal(0);
+          }}>
+            <Icon name="sliders" size={30} color="white" />
+          </TouchableOpacity>
+        </AnimatedView>
       </View>
-      <Spring native from={{marginTop: 0}} to={{marginTop: pos ? 100 + modal : 0}} delay={modal === 0 ? 300 : 0}>
-        {props =>  <animated.View style={{...props}}/>}
-      </Spring>
-      <Spring
-        native
-        from={{...styles.timeBox}}
-        to={{
-          ...styles.timeBox,
-          marginLeft: modal === 70 ? Dimensions.get('window').width * 0.05 : -Dimensions.get('window').width,
-        }}
-        delay={modal === 70 ? 0 : 100}
-      >
-        {props => (
-          <animated.View style={{...props}}>
-            <TouchableOpacity
-              onPress={() => {
-                setModal(0);
-                dispatch(setTime('hour'));
-                dispatch(timeSort({type: sortMethod, time: 'hour'}));
-              }}
-              style={{
-                ...styles.timeButton,
-                backgroundColor: time === 'Live' ? 'rgb(250, 204, 50)' : 'white',
-                borderWidth: time === 'Live' ? 0 : 1,
-              }}
-            >
-              <Text style={{...styles.typeText, color: time === 'Live' ? 'white' : 'rgb(60, 60, 60)'}}>
-                Live
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setModal(0);
-                dispatch(setTime('day'))
-                dispatch(timeSort({type: sortMethod, time: 'day'}));
-              }}
-              style={{
-                ...styles.timeButton,
-                backgroundColor: time === '24 Hrs' ? 'rgb(250, 204, 50)' : 'white',
-                borderWidth: time === '24 Hrs' ? 0 : 1,
-              }}
-            >
-              <Text style={{...styles.typeText, color: time === '24 Hrs' ? 'white' : 'rgb(60, 60, 60)'}}>
-                24 Hrs
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setModal(0);
-                dispatch(setTime('week'));
-                dispatch(timeSort({type: sortMethod, time: 'week'}));
-              }}
-              style={{
-                ...styles.timeButton,
-                backgroundColor: time === '1 Week' ? 'rgb(250, 204, 50)' : 'white',
-                borderWidth: time === '1 Week' ? 0 : 1,
-              }}
-            >
-              <Text style={{...styles.typeText, color: time === '1 Week' ? 'white' : 'rgb(60, 60, 60)'}}>
-                1 Week
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setModal(0);
-                dispatch(setTime('month'))
-                dispatch(timeSort({type: sortMethod, time: 'month'}));
-              }}
-              style={{
-                ...styles.timeButton,
-                backgroundColor: time === '30 Days' ? 'rgb(250, 204, 50)' : 'white',
-                borderWidth: time === '30 Days' ? 0 : 1,
-              }}
-            >
-              <Text style={{...styles.typeText, color: time === '30 Days' ? 'white' : 'rgb(60, 60, 60)'}}>
-                30 Days
-              </Text>
-            </TouchableOpacity>
-          </animated.View>
-        )}
-      </Spring>
+      <AnimatedView style={marginProps}/>
+      <AnimatedView style={timeBoxProps}>
+        <TouchableOpacity
+          onPress={() => {
+            setModal(0);
+            dispatch(setTime('hour'));
+            dispatch(timeSort({type: sortMethod, time: 'hour'}));
+          }}
+          style={{
+            ...styles.timeButton,
+            backgroundColor: time === 'Live' ? 'rgb(250, 204, 50)' : 'white',
+            borderWidth: time === 'Live' ? 0 : 1,
+          }}
+        >
+          <Text style={{...styles.typeText, color: time === 'Live' ? 'white' : 'rgb(60, 60, 60)'}}>
+            Live
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setModal(0);
+            dispatch(setTime('day'))
+            dispatch(timeSort({type: sortMethod, time: 'day'}));
+          }}
+          style={{
+            ...styles.timeButton,
+            backgroundColor: time === '24 Hrs' ? 'rgb(250, 204, 50)' : 'white',
+            borderWidth: time === '24 Hrs' ? 0 : 1,
+          }}
+        >
+          <Text style={{...styles.typeText, color: time === '24 Hrs' ? 'white' : 'rgb(60, 60, 60)'}}>
+            24 Hrs
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setModal(0);
+            dispatch(setTime('week'));
+            dispatch(timeSort({type: sortMethod, time: 'week'}));
+          }}
+          style={{
+            ...styles.timeButton,
+            backgroundColor: time === '1 Week' ? 'rgb(250, 204, 50)' : 'white',
+            borderWidth: time === '1 Week' ? 0 : 1,
+          }}
+        >
+          <Text style={{...styles.typeText, color: time === '1 Week' ? 'white' : 'rgb(60, 60, 60)'}}>
+            1 Week
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setModal(0);
+            dispatch(setTime('month'))
+            dispatch(timeSort({type: sortMethod, time: 'month'}));
+          }}
+          style={{
+            ...styles.timeButton,
+            backgroundColor: time === '30 Days' ? 'rgb(250, 204, 50)' : 'white',
+            borderWidth: time === '30 Days' ? 0 : 1,
+          }}
+        >
+          <Text style={{...styles.typeText, color: time === '30 Days' ? 'white' : 'rgb(60, 60, 60)'}}>
+            30 Days
+          </Text>
+        </TouchableOpacity>
+      </AnimatedView>
     </View>
   );
 }

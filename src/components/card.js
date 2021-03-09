@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Image, TextInput } from 'react-native';
-import { Spring, animated } from 'react-spring/dist/react-spring-native.esm';
+import { useSpring, animated } from 'react-spring/native.js';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Context } from '../context.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearch } from '../redux/search.js';
+
+const AnimatedView = animated(View);
 
 const Card = ({ name, symbol, rank, supply, price, volume, percents, cap }) => {
   const { user, update } = useContext(Context);
@@ -62,7 +64,22 @@ const Card = ({ name, symbol, rank, supply, price, volume, percents, cap }) => {
     } else {
       setNumErr(true);
     }
-  }
+  };
+
+  const springProps = useSpring({
+    from: {
+      overflow: 'hidden',
+      height: 0,
+      paddingLeft: Dimensions.get('window').width * 0.06,
+      paddingRight: Dimensions.get('window').width * 0.06,
+    },
+    to: {
+      overflow: 'hidden',
+      height: pos ? 230 : 0,
+      paddingLeft: Dimensions.get('window').width * 0.06,
+      paddingRight: Dimensions.get('window').width * 0.06,
+    }
+  })
 
   return (
     <View style={{...styles.container, backgroundColor: pos ? 'rgb(250, 250, 250)' : 'rgb(240, 240, 245)'}}>
@@ -89,70 +106,52 @@ const Card = ({ name, symbol, rank, supply, price, volume, percents, cap }) => {
         </View>
         <Text style={styles.price}>${fixedPrice}</Text>
       </TouchableOpacity>
-      <Spring
-        native
-        from={{
-          overflow: 'hidden',
-          height: 0,
-          paddingLeft: Dimensions.get('window').width * 0.06,
-          paddingRight: Dimensions.get('window').width * 0.06,
-        }}
-        to={{
-          overflow: 'hidden',
-          height: pos ? 230 : 0,
-          paddingLeft: Dimensions.get('window').width * 0.06,
-          paddingRight: Dimensions.get('window').width * 0.06,
-        }}
-      >
-        {props => (
-          <animated.View style={{...props}}>
-            <View style={styles.drawer}>
-              <View style={styles.drawerLeft}>
-                <Text style={styles.boldText}>Popularity:</Text>
-                <Text style={styles.stat}>{rank}</Text>
-                <Text style={styles.boldText}>Volume:</Text>
-                <Text style={styles.stat}>{volume.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
-              </View>
-              <View style={styles.drawerRight}>
-                <Text style={styles.boldText}>Market Cap:</Text>
-                <Text style={styles.stat}>${cap.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
-                <Text style={styles.boldText}>Circulating Supply:</Text>
-                <Text style={styles.stat}>{supply.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
-              </View>
-            </View>
-            <Text style={{...styles.boldText, marginTop: 20}}>Set Upper & Lower Limit</Text>
-            <Text style={{...styles.error, display: rangeErr ? 'flex' : 'none'}}>
-              Upper Limit must be greater than Lower Limit
-            </Text>
-            <Text style={{...styles.error, display: numErr ? 'flex' : 'none'}}>
-              Limits must be numbers
-            </Text>
-            <View style={styles.side}>
-              <View style={styles.limitDollar}>
-                <Text style={styles.dollar}>$</Text>
-                <TextInput
-                  value={upper}
-                  style={styles.limit}
-                  onChangeText={(e) => setUpper(e)}
-                />
-              </View>
-              <View style={styles.limitDollar}>
-                <Text style={styles.dollar}>$</Text>
-                <TextInput
-                  value={lower}
-                  style={styles.limit}
-                  onChangeText={(e) => setLower(e)}
-                />
-              </View>
-              <TouchableOpacity
-                style={styles.submit}
-                onPress={add}>
-                <Icon name="check" size={24} color="white" />
-              </TouchableOpacity>
-            </View>
-          </animated.View>
-        )}
-      </Spring>
+      <AnimatedView style={springProps}>
+        <View style={styles.drawer}>
+          <View style={styles.drawerLeft}>
+            <Text style={styles.boldText}>Popularity:</Text>
+            <Text style={styles.stat}>{rank}</Text>
+            <Text style={styles.boldText}>Volume:</Text>
+            <Text style={styles.stat}>{volume.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
+          </View>
+          <View style={styles.drawerRight}>
+            <Text style={styles.boldText}>Market Cap:</Text>
+            <Text style={styles.stat}>${cap.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
+            <Text style={styles.boldText}>Circulating Supply:</Text>
+            <Text style={styles.stat}>{supply.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
+          </View>
+        </View>
+        <Text style={{...styles.boldText, marginTop: 20}}>Set Upper & Lower Limit</Text>
+        <Text style={{...styles.error, display: rangeErr ? 'flex' : 'none'}}>
+          Upper Limit must be greater than Lower Limit
+        </Text>
+        <Text style={{...styles.error, display: numErr ? 'flex' : 'none'}}>
+          Limits must be numbers
+        </Text>
+        <View style={styles.side}>
+          <View style={styles.limitDollar}>
+            <Text style={styles.dollar}>$</Text>
+            <TextInput
+              value={upper}
+              style={styles.limit}
+              onChangeText={(e) => setUpper(e)}
+            />
+          </View>
+          <View style={styles.limitDollar}>
+            <Text style={styles.dollar}>$</Text>
+            <TextInput
+              value={lower}
+              style={styles.limit}
+              onChangeText={(e) => setLower(e)}
+            />
+          </View>
+          <TouchableOpacity
+            style={styles.submit}
+            onPress={add}>
+            <Icon name="check" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      </AnimatedView>
       <View style={styles.line} />
     </View>
   );

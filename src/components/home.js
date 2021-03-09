@@ -1,18 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { StyleSheet, Text, View, Button, ScrollView, Dimensions } from 'react-native';
-import { Notifications } from 'expo';
-import * as Permissions from 'expo-permissions';
 import io from 'socket.io-client';
 import Card from './card.js';
 import Header from './header.js';
 import Search from './search.js';
 import Saved from './saved.js';
 import { Context } from '../context.js';
-// import AnimatedLoader from 'react-native-animated-loader';
 import { useSelector, useDispatch } from 'react-redux';
 import { sortData } from '../redux/coins.js';
 
 const socket = io.connect('http://ec2-13-52-237-73.us-west-1.compute.amazonaws.com:8020');
+
 
 const Home = () => {
   const { user, update, setLoginLoad } = useContext(Context);
@@ -23,24 +21,9 @@ const Home = () => {
   const [visible, setVisible] = useState(true);
   const [reset, setReset] = useState(true);
 
-  const registerForPushNotifications = async () => {
-    try {
-      const permission = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-      if (!permission.granted) return;
-      const token = await Notifications.getExpoPushTokenAsync();
-      console.log('notification toke', token);
-    } catch (err) {
-      console.log('error getting a token', err);
-    }
-  };
-
-  useEffect(() => {
-    registerForPushNotifications();
-  }, [])
-
   useEffect(() => {
     if (allCoins.length > 0) setVisible(false);
-  }, [allCoins])
+  }, [allCoins]);
 
   useEffect(() => {
     if (user) {
@@ -63,18 +46,9 @@ const Home = () => {
   return (
     <View style={styles.container}>
       <Header />
-      {/* <AnimatedLoader
-        visible={visible}
-        overlayColor="rgba(255,255,255,0.75)"
-        source={require("../loader/8195-loader-aniation.json")}
-        animationStyle={styles.lottie}
-        speed={1}
-      /> */}
       <ScrollView style={styles.scroll}>
         <Search />
-        {/* <Button title="send notif" onPress={async () => {
-          await sendPushNotification('derek');
-        }}/> */}
+        <Button title="send notif"/>
         <Text style={{...styles.category, marginTop: 48}}>Saved</Text>
         {savedCoins.map((c) => (
           <Saved
@@ -108,25 +82,6 @@ const Home = () => {
   );
 };
 
-async function sendPushNotification(expoPushToken) {
-  const message = {
-    to: expoPushToken,
-    sound: 'default',
-    title: 'Original Title',
-    body: 'And here is the body!',
-    data: { someData: 'goes here' },
-  };
-
-  await fetch('https://exp.host/--/api/v2/push/send', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Accept-encoding': 'gzip, deflate',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(message),
-  });
-}
 
 const styles = StyleSheet.create({
   category: {

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useContext, useReducer } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Image, TextInput } from 'react-native';
-import { Spring, animated } from 'react-spring/dist/react-spring-native.esm';
+import { useSpring, animated } from 'react-spring/native.js';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Context } from '../context.js';
 import { useSelector, useDispatch } from 'react-redux';
+
+const AnimatedView = animated(View);
 
 const Saved = ({ name, symbol, rank, supply, price, volume, percents, cap }) => {
   const { user, update } = useContext(Context);
@@ -80,12 +82,29 @@ const Saved = ({ name, symbol, rank, supply, price, volume, percents, cap }) => 
     } else {
       setNumErr(true);
     }
-  }
+  };
 
   const remove = async() => {
     await firestore().collection('Users').doc(user.email).collection('Saved').doc(symbol).delete();
     update();
-  }
+  };
+
+  const springProps = useSpring({
+    from: {
+      overflow: 'hidden',
+      height: 0,
+      paddingLeft: Dimensions.get('window').width * 0.06,
+      paddingRight: Dimensions.get('window').width * 0.06,
+      backgroundColor: 'rgb(240, 240, 245)',
+    },
+    to: {
+      overflow: 'hidden',
+      height: pos ? 345 : 0,
+      paddingLeft: Dimensions.get('window').width * 0.06,
+      paddingRight: Dimensions.get('window').width * 0.06,
+      backgroundColor: pos ? 'rgb(250, 250, 250)' : 'rgb(240, 240, 245)',
+    }
+  })
 
   return (
     <View style={{
@@ -118,87 +137,67 @@ const Saved = ({ name, symbol, rank, supply, price, volume, percents, cap }) => 
           <Text>Lower: ${lower}</Text>
         </View>
       </TouchableOpacity>
-      <Spring
-        native
-        from={{
-          overflow: 'hidden',
-          height: 0,
-          paddingLeft: Dimensions.get('window').width * 0.06,
-          paddingRight: Dimensions.get('window').width * 0.06,
-          backgroundColor: 'rgb(240, 240, 245)',
-        }}
-        to={{
-          overflow: 'hidden',
-          height: pos ? 345 : 0,
-          paddingLeft: Dimensions.get('window').width * 0.06,
-          paddingRight: Dimensions.get('window').width * 0.06,
-          backgroundColor: pos ? 'rgb(250, 250, 250)' : 'rgb(240, 240, 245)',
-        }}
-      >
-        {props => (
-          <animated.View style={{...props}}>
-            <View style={styles.drawer}>
-              <View style={styles.drawerLeft}>
-                <Text style={styles.boldText}>Popularity:</Text>
-                <Text style={styles.stat}>{rank}</Text>
-                <Text style={styles.boldText}>Volume:</Text>
-                <Text style={styles.stat}>{volume.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
-              </View>
-              <View style={styles.drawerRight}>
-                <Text style={styles.boldText}>Market Cap:</Text>
-                <Text style={styles.stat}>${cap.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
-                <Text style={styles.boldText}>Circulating Supply:</Text>
-                <Text style={styles.stat}>{supply.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
-              </View>
+      <AnimatedView style={springProps}>
+        <View style={styles.drawer}>
+          <View style={styles.drawerLeft}>
+            <Text style={styles.boldText}>Popularity:</Text>
+            <Text style={styles.stat}>{rank}</Text>
+            <Text style={styles.boldText}>Volume:</Text>
+            <Text style={styles.stat}>{volume.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
+          </View>
+          <View style={styles.drawerRight}>
+            <Text style={styles.boldText}>Market Cap:</Text>
+            <Text style={styles.stat}>${cap.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
+            <Text style={styles.boldText}>Circulating Supply:</Text>
+            <Text style={styles.stat}>{supply.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
+          </View>
+        </View>
+        <Text style={{...styles.boldText, marginTop: 20,}}>Set Upper & Lower Limit</Text>
+        <Text style={{...styles.error, display: rangeErr ? 'flex' : 'none'}}>
+          Upper Limit must be greater than Lower Limit
+        </Text>
+        <Text style={{...styles.error, display: numErr ? 'flex' : 'none'}}>
+          Limits must be numbers
+        </Text>
+        <View style={styles.side}>
+          <View style={styles.limitCont}>
+            <Text>current: {saved[symbol] ? saved[symbol][0] : '0'}</Text>
+            <View style={styles.limitDollar}>
+              <Text style={styles.dollar}>$</Text>
+              <TextInput
+                value={upper}
+                style={styles.limit}
+                onChangeText={(e) => setUpper(e)}
+              />
             </View>
-            <Text style={{...styles.boldText, marginTop: 20,}}>Set Upper & Lower Limit</Text>
-            <Text style={{...styles.error, display: rangeErr ? 'flex' : 'none'}}>
-              Upper Limit must be greater than Lower Limit
-            </Text>
-            <Text style={{...styles.error, display: numErr ? 'flex' : 'none'}}>
-              Limits must be numbers
-            </Text>
-            <View style={styles.side}>
-              <View style={styles.limitCont}>
-                <Text>current: {saved[symbol] ? saved[symbol][0] : '0'}</Text>
-                <View style={styles.limitDollar}>
-                  <Text style={styles.dollar}>$</Text>
-                  <TextInput
-                    value={upper}
-                    style={styles.limit}
-                    onChangeText={(e) => setUpper(e)}
-                  />
-                </View>
-              </View>
-              <View style={styles.limitCont}>
-                <Text>current: {saved[symbol] ? saved[symbol][1] : '0'}</Text>
-                <View style={styles.limitDollar}>
-                  <Text style={styles.dollar}>$</Text>
-                  <TextInput
-                    value={lower}
-                    style={styles.limit}
-                    onChangeText={(e) => setLower(e)}
-                  />
-                </View>
-              </View>
-              <TouchableOpacity style={styles.submit} onPress={add}>
-                <Icon name="check" size={24} color="white" />
-              </TouchableOpacity>
+          </View>
+          <View style={styles.limitCont}>
+            <Text>current: {saved[symbol] ? saved[symbol][1] : '0'}</Text>
+            <View style={styles.limitDollar}>
+              <Text style={styles.dollar}>$</Text>
+              <TextInput
+                value={lower}
+                style={styles.limit}
+                onChangeText={(e) => setLower(e)}
+              />
             </View>
-            <View style={styles.remove}>
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => {
-                  setPos(false);
-                  setTimeout(() => remove(), 270);
-                }}
-              >
-                <Text style={styles.removeText}>Remove</Text>
-              </TouchableOpacity>
-            </View>
-          </animated.View>
-        )}
-      </Spring>
+          </View>
+          <TouchableOpacity style={styles.submit} onPress={add}>
+            <Icon name="check" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.remove}>
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => {
+              setPos(false);
+              setTimeout(() => remove(), 270);
+            }}
+          >
+            <Text style={styles.removeText}>Remove</Text>
+          </TouchableOpacity>
+        </View>
+      </AnimatedView>
       <View style={styles.line} />
     </View>
   );
