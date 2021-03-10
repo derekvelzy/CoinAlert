@@ -37,7 +37,7 @@ __Built with__
 #### Frontend ####
 - JavaScript
 - React Native
-- Redux
+- Redux Toolkit
 - Socket.io
 - React Spring
 
