@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     marginBottom: 10,
+    fontFamily: 'Avenir-MediumOblique',
   }
 });
 

@@ -32,7 +32,9 @@ const Saved = ({ name, symbol, rank, supply, price, volume, percents, cap }) => 
 
 
   useEffect(() => {
-    getLimits();
+    if (user.email) {
+      getLimits();
+    }
   }, [price, pos]);
 
   useEffect(() => {
@@ -128,13 +130,13 @@ const Saved = ({ name, symbol, rank, supply, price, volume, percents, cap }) => 
               <Text style={styles.bold}>{symbol}</Text>
               <Text style={styles.fullname}>{name}</Text>
             </View>
-            <Text>{time}: {Number.parseFloat(percents[apiTime]).toFixed(3)} %</Text>
+            <Text style={{fontFamily: 'Avenir Next'}}>{time}: {Number.parseFloat(percents[apiTime]).toFixed(3)} %</Text>
           </View>
         </View>
         <View style={styles.priceAndLimits}>
           <Text style={styles.price}>${fixedPrice}</Text>
-          <Text>Upper: ${upper}</Text>
-          <Text>Lower: ${lower}</Text>
+          <Text style={{fontFamily: 'Avenir Next'}}>Upper: ${upper}</Text>
+          <Text style={{fontFamily: 'Avenir Next'}}>Lower: ${lower}</Text>
         </View>
       </TouchableOpacity>
       <AnimatedView style={springProps}>
@@ -208,12 +210,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 10,
     fontSize: 14,
+    fontFamily: 'Avenir-Medium',
   },
   boldText: {
     marginTop: 5,
     marginBottom: 5,
     fontWeight: 'bold',
     fontSize: 14,
+    fontFamily: 'Avenir-Medium',
   },
   container: {
     width: Dimensions.get('window').width,
@@ -238,6 +242,7 @@ const styles = StyleSheet.create({
     color: 'red'
   },
   fullname: {
+    fontFamily: 'Avenir Next',
     fontSize: 14,
   },
   img: {
@@ -263,7 +268,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 10,
     paddingLeft: 20,
-    fontSize: 18
+    fontSize: 18,
+    fontFamily: 'Avenir Next'
   },
   limitCont: {
     marginTop: 10,

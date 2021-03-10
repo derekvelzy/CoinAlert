@@ -39,8 +39,8 @@ const Search = () => {
     from: {...styles.options},
     to: {
       ...styles.options,
-      right: pos ? 0 : -180,
-      width: pos ? Dimensions.get('window').width * 0.9 : 50,
+      right: !pos ? -180 : 0,
+      width: pos ? Dimensions.get('window').width * 0.9 : 0
     },
     delay: pos ? 350 : 0
   });
@@ -282,6 +282,7 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
     fontSize: 20,
+    fontFamily: 'Avenir-Medium',
   },
   searchbarBox: {
     width: Dimensions.get('window').width * 0.7,
@@ -340,6 +341,7 @@ const styles = StyleSheet.create({
   typeText: {
     fontWeight: 'bold',
     fontSize: 13,
+    fontFamily: 'Avenir-Medium',
   }
 });
 

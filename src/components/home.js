@@ -48,9 +48,8 @@ const Home = () => {
       <Header />
       <ScrollView style={styles.scroll}>
         <Search />
-        <Button title="send notif"/>
-        <Text style={{...styles.category, marginTop: 48}}>Saved</Text>
-        {savedCoins.map((c) => (
+        {user.email ? <Text style={{...styles.category, marginTop: 48}}>Saved</Text> : <View />}
+        {user.email ? savedCoins.map((c) => (
           <Saved
             key={c.symbol}
             name={c.name}
@@ -62,8 +61,8 @@ const Home = () => {
             percents={{hour: c.hour, day: c.day, week: c.week, month: c.month}}
             cap={c.cap}
           />
-        ))}
-        <Text style={{...styles.category, marginTop: 35}}>Crypto</Text>
+        )) : <View />}
+        <Text style={{...styles.category, marginTop: 35}}>All Cryptocurrencies</Text>
         {coins.map((c) => (
           <Card
             key={c.symbol}
@@ -90,6 +89,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginBottom: 25,
     zIndex: 0,
+    fontFamily: 'Avenir-Medium',
   },
   container: {
     flex: 1,

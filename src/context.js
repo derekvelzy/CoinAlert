@@ -7,6 +7,12 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearch } from './redux/search.js';
 import { setAllCoins, setCoins, setSavedCoins, setSaved, sortData } from './redux/coins.js';
+import appleAuth, {
+  AppleButton,
+  AppleAuthRequestOperation,
+  AppleAuthRequestScope,
+  AppleAuthCredentialState,
+} from '@invertase/react-native-apple-authentication';
 
 GoogleSignin.configure({ webClientId: googleWebClientID });
 
@@ -18,6 +24,8 @@ const ConfigProvider = ({ children }) => {
 
   const [user, setUser] = useState('');
   const [loginLoad, setLoginLoad] = useState(false);
+  const [loginErr, setLoginErr] = useState(false);
+  const [signupErr, setSignupErr] = useState(false);
 
   const update = () => {
     firestore().collection('Users').doc(user.email).collection('Saved').get()
@@ -54,6 +62,37 @@ const ConfigProvider = ({ children }) => {
     }
   };
 
+  const login = async (email, pass) => {
+    try {
+      setLoginErr(false);
+      await auth().signInWithEmailAndPassword(email, pass);
+      // setEmojiElements(emojiTable());
+    } catch (e) {
+      setLoginErr(true);
+      console.log('error logging in', e);
+    }
+  };
+
+  const signup = async (email, pass) => {
+    try {
+      setSignupErr(false);
+      await auth().createUserWithEmailAndPassword(email, pass);
+      firestore().collection('Users').doc(email).set({email})
+      // setEmojiElements(emojiTable());
+    } catch (e) {
+      setSignupErr(true);
+      console.log('error signing up', e);
+    }
+  };
+
+  const guest = async () => {
+    try {
+      auth().signInAnonymously();
+    } catch (e) {
+      console.log('error signing in anonymously', e);
+    }
+  }
+
   return (
     <Context.Provider
       value={{
@@ -61,9 +100,16 @@ const ConfigProvider = ({ children }) => {
         setUser,
         logout,
         google,
+        login,
+        signup,
+        guest,
         update,
         loginLoad,
-        setLoginLoad
+        setLoginLoad,
+        loginErr,
+        setLoginErr,
+        signupErr,
+        setSignupErr
       }}>
       {children}
     </Context.Provider>

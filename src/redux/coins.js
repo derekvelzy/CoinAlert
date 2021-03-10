@@ -64,7 +64,6 @@ export const coinSlice = createSlice({
         .sort((a, b) => state.sortMethod ? b[state.apiTime] - a[state.apiTime] : a.rank - b.rank);
     },
     sortData: (state, action) => {
-      console.log(state.savedCoins);
       state.allCoins = action.payload.data;
       state.savedCoins =
         action.payload.data

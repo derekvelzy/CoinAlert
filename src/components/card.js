@@ -66,6 +66,11 @@ const Card = ({ name, symbol, rank, supply, price, volume, percents, cap }) => {
     }
   };
 
+  let heightMargin = 230;
+  if (!user.email) {
+    heightMargin = 120;
+  }
+
   const springProps = useSpring({
     from: {
       overflow: 'hidden',
@@ -75,11 +80,11 @@ const Card = ({ name, symbol, rank, supply, price, volume, percents, cap }) => {
     },
     to: {
       overflow: 'hidden',
-      height: pos ? 230 : 0,
+      height: pos ? heightMargin : 0,
       paddingLeft: Dimensions.get('window').width * 0.06,
       paddingRight: Dimensions.get('window').width * 0.06,
     }
-  })
+  });
 
   return (
     <View style={{...styles.container, backgroundColor: pos ? 'rgb(250, 250, 250)' : 'rgb(240, 240, 245)'}}>
@@ -101,7 +106,7 @@ const Card = ({ name, symbol, rank, supply, price, volume, percents, cap }) => {
               <Text style={styles.bold}>{symbol}</Text>
               <Text style={styles.fullname}>{name}</Text>
             </View>
-            <Text>{time}: {Number.parseFloat(percents[apiTime]).toFixed(3)} %</Text>
+            <Text style={{fontFamily: 'Avenir Next'}}>{time}: {Number.parseFloat(percents[apiTime]).toFixed(3)} %</Text>
           </View>
         </View>
         <Text style={styles.price}>${fixedPrice}</Text>
@@ -121,14 +126,16 @@ const Card = ({ name, symbol, rank, supply, price, volume, percents, cap }) => {
             <Text style={styles.stat}>{supply.replace( /\d{1,3}(?=(\d{3})+(?!\d))/g , "$&,")}</Text>
           </View>
         </View>
-        <Text style={{...styles.boldText, marginTop: 20}}>Set Upper & Lower Limit</Text>
+        <Text style={{...styles.boldText, marginTop: 20, display: user.email ? 'flex' : 'none'}}>
+          Set Upper & Lower Limit
+        </Text>
         <Text style={{...styles.error, display: rangeErr ? 'flex' : 'none'}}>
           Upper Limit must be greater than Lower Limit
         </Text>
         <Text style={{...styles.error, display: numErr ? 'flex' : 'none'}}>
           Limits must be numbers
         </Text>
-        <View style={styles.side}>
+        <View style={{...styles.side, display: user.email ? 'flex' : 'none'}}>
           <View style={styles.limitDollar}>
             <Text style={styles.dollar}>$</Text>
             <TextInput
@@ -162,6 +169,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 10,
     fontSize: 14,
+    fontFamily: 'Avenir-Medium',
   },
   boldText: {
     marginTop: 5,
@@ -193,6 +201,7 @@ const styles = StyleSheet.create({
   },
   fullname: {
     fontSize: 14,
+    fontFamily: 'Avenir Next',
   },
   img: {
     width: 45,
@@ -217,7 +226,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 10,
     paddingLeft: 20,
-    fontSize: 18
+    fontSize: 18,
+    fontFamily: 'Avenir Next'
   },
   limitDollar: {
     flexDirection: 'row',
@@ -248,7 +258,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   price: {
-    fontSize: 16
+    fontSize: 16,
+    fontFamily: 'Avenir-Medium',
   },
   side: {
     display: 'flex',
